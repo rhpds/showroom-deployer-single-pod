@@ -26,7 +26,6 @@ This makes management and cleanup a bit difficult.
 
 === Deploy Showroom - Parameters
 
-
 In this scenario you have:
 
 * a Git repo URL with an Antora website and want OpenShift to build and deploy
