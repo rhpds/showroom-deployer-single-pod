@@ -101,7 +101,7 @@ spec:
           - name: terminal-secret
             mountPath: /sshkey/ # not implemented
         ports:
-         - containerPort: {{ .Values.terminal.wetty.port }}
+         - containerPort: 8001
            protocol: TCP
         resources:
           {{- toYaml .Values.terminal.resources | nindent 10 }}
