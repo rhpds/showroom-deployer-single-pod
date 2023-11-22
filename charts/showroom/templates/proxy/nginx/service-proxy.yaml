@@ -11,4 +11,4 @@ spec:
     protocol: TCP
     targetPort: 8081
   selector:
-    app.kubernetes.io/name: showroom-proxy
+    app.kubernetes.io/name: showroom
