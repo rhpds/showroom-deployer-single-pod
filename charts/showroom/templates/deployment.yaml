@@ -18,7 +18,7 @@ spec:
       containers:
       - name: showroom
         image: {{ .Values.home.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -37,7 +37,7 @@ spec:
           mountPath: {{ .Values.home.contentMount }}
       - name: showroom-content
         image: {{ .Values.content.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
           - name: GIT_REPO_URL
             value: {{ .Values.content.repoUrl }}
@@ -63,7 +63,7 @@ spec:
             port: 8000
       - name: nginx
         image: {{ .Values.proxy.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - mountPath: /etc/nginx
           name: nginx-config
@@ -81,10 +81,10 @@ spec:
           containerPort: 8081
       - name: {{ .Values.terminal.name }}
         image: {{ .Values.terminal.image }}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
           - --base={{ .Values.terminal.wetty.base }}
-          - --port=8081
+          - --port=8082
 {{- if .Values.terminal.wetty.autoSshToBastion }}
           - --ssh-host={{ .Values.terminal.wetty.sshHost }}
           - --ssh-port={{ .Values.terminal.wetty.sshPort }}

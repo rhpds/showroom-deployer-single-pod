@@ -22,7 +22,7 @@ data:
 
 
       server {
-          listen 8080;
+          listen 8081;
 
           absolute_redirect off;
 
@@ -57,7 +57,7 @@ data:
           }
 
           location ^~ /wetty {
-            proxy_pass http://localhost:8081/wetty;
+            proxy_pass http://localhost:8082/wetty;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
@@ -72,7 +72,7 @@ data:
           location /{
             expires off;
             proxy_cache off;
-            proxy_pass http://localhost:8080;
+            proxy_pass http://localhost:8081;
           }
 
       }
