@@ -19,7 +19,7 @@ proxy:
   image: nginx:1.24
 
 home:
-  image: registry.redhat.io/ubi8/httpd-24:latest
+  image: registry.redhat.io/ubi9/httpd-24:latest
   contentMount: /var/www/html/
   contentConfig: showroom-html
   resources:
@@ -66,7 +66,6 @@ terminal:
   wetty:
     autoSshToBastion: false
     base: '/wetty/'
-    port: 8080
     sshHost: shared-410-bastion.openshift.redhatworkshops.io
     sshPort: 22
     sshUser: ec2-user

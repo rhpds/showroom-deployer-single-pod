@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: showroom-proxy
+  name: showroom
   namespace: {{ .Values.namespace.name }}
 spec:
   type: ClusterIP
@@ -11,4 +11,4 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app.kubernetes.io/name: showroom-proxy
+    app.kubernetes.io/name: showroom

@@ -1,0 +1,127 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showroom
+  namespace: {{ .Values.namespace.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: showroom
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: showroom
+    spec:
+      serviceAccountName: {{ .Values.terminal.serviceAccount }}
+      containers:
+      - name: showroom
+        image: {{ .Values.home.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        resources:
+          {{- toYaml .Values.home.resources | nindent 10 }}
+        volumeMounts:
+        - name: content
+          mountPath: {{ .Values.home.contentMount }}
+      - name: showroom-content
+        image: {{ .Values.content.image }}
+        imagePullPolicy: Always
+        env:
+          - name: GIT_REPO_URL
+            value: {{ .Values.content.repoUrl }}
+          - name: GIT_REPO_REF
+            value: {{ .Values.content.repoRef }}
+          - name: ANTORA_PLAYBOOK
+            value: {{ .Values.content.antoraPlaybook }}
+        volumeMounts:
+          - name: user-data
+            mountPath: /user_data/
+          - name: showroom
+            mountPath: /showroom/
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+      - name: nginx
+        image: {{ .Values.proxy.image }}
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /etc/nginx
+          name: nginx-config
+        - mountPath: /var/cache/nginx
+          name: nginx-cache
+        - mountPath: /var/run
+          name: nginx-pid
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - name: web
+          containerPort: 8081
+      - name: {{ .Values.terminal.name }}
+        image: {{ .Values.terminal.image }}
+        imagePullPolicy: Always
+        args:
+          - --base={{ .Values.terminal.wetty.base }}
+          - --port=8081
+{{- if .Values.terminal.wetty.autoSshToBastion }}
+          - --ssh-host={{ .Values.terminal.wetty.sshHost }}
+          - --ssh-port={{ .Values.terminal.wetty.sshPort }}
+          - --ssh-user={{ .Values.terminal.wetty.sshUser }}
+          - --ssh-auth={{ .Values.terminal.wetty.sshAuth }}
+          - --ssh-pass={{ .Values.terminal.wetty.sshPass }}
+{{- end }}
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+          - name: terminal-secret
+            mountPath: /sshkey/ # not implemented
+        ports:
+         - containerPort: {{ .Values.terminal.wetty.port }}
+           protocol: TCP
+        resources:
+          {{- toYaml .Values.terminal.resources | nindent 10 }}
+      volumes:
+      - name: showroom
+        emptyDir: {}
+      - name: user-data
+        configMap:
+          name: {{ .Values.content.userdataName }}
+      - name: content
+        configMap:
+          name: {{ .Values.home.contentConfig }}
+      - configMap:
+          defaultMode: 420
+          name: showroom-proxy
+        name: nginx-config
+      - emptyDir: {}
+        name: nginx-pid
+      - emptyDir: {}
+        name: nginx-cache
+      - name: terminal-secret
+        secret:
+          secretName: terminal-secret

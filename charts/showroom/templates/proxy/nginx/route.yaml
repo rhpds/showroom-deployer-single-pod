@@ -2,14 +2,14 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: showroom-proxy
+  name: showroom
   namespace: {{ .Values.namespace.name }}
   labels:
-    app.kubernetes.io/name: showroom-proxy
+    app.kubernetes.io/name: showroom
 spec:
   to:
     kind: Service
-    name: showroom-proxy
+    name: showroom
   port:
     targetPort: 8080
   tls:
