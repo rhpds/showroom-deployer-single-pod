@@ -16,26 +16,30 @@ spec:
     spec:
       serviceAccountName: {{ .Values.terminal.serviceAccount }}
       containers:
-      - name: showroom
-        image: {{ .Values.home.image }}
+
+      - name: nginx
+        image: {{ .Values.proxy.image }}
         imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          protocol: TCP
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-        resources:
-          {{- toYaml .Values.home.resources | nindent 10 }}
         volumeMounts:
-        - name: content
-          mountPath: {{ .Values.home.contentMount }}
-      - name: showroom-content
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx-config
+          subPath: nginx.conf
+        - mountPath: /data/www
+          name: content
+        - mountPath: /var/cache/nginx
+          name: nginx-cache
+        - mountPath: /var/run
+          name: nginx-pid
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - name: web
+          containerPort: 8080
+
+      - name: content
         image: {{ .Values.content.image }}
         imagePullPolicy: IfNotPresent
         env:
@@ -61,30 +65,13 @@ spec:
           httpGet:
             path: /
             port: 8000
-      - name: nginx
-        image: {{ .Values.proxy.image }}
-        imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - mountPath: /etc/nginx
-          name: nginx-config
-        - mountPath: /var/cache/nginx
-          name: nginx-cache
-        - mountPath: /var/run
-          name: nginx-pid
-        env:
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        ports:
-        - name: web
-          containerPort: 8081
-      - name: {{ .Values.terminal.name }}
+
+      - name: terminal
         image: {{ .Values.terminal.image }}
         imagePullPolicy: IfNotPresent
         args:
           - --base={{ .Values.terminal.wetty.base }}
-          - --port=8082
+          - --port=8001
           - --allow-iframe
 {{- if .Values.terminal.wetty.autoSshToBastion }}
           - --ssh-host={{ .Values.terminal.wetty.sshHost }}
@@ -106,6 +93,7 @@ spec:
            protocol: TCP
         resources:
           {{- toYaml .Values.terminal.resources | nindent 10 }}
+
       volumes:
       - name: showroom
         emptyDir: {}
