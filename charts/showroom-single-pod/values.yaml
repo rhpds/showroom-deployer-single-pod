@@ -10,36 +10,18 @@ namespace:
   create: true
   name: showroom
 
-guid: nnnn
-
 deployer:
   domain: cluster-GUID.GUID.sandboxNUMBERS.opentlc.com
 
 proxy:
-  image: nginx:1.24
+  image: docker.io/library/nginx:1.25
+  imagePullPolicy: IfNotPresent
+  indexHtmlConfigMap: showroom-index
+  nginxConfigMap: showroom-proxy-config
 
-home:
-  image: registry.redhat.io/ubi9/httpd-24:latest
-  contentMount: /var/www/html/
-  contentConfig: showroom-html
-  resources:
-    limits:
-      memory: 64Mi
-    requests:
-      cpu: 100m
-      memory: 64Mi
-
-#
-# Use this to reference an external url for the documentation.
-#
-# documentation:
-#   url: https://my-documentation.external.com
-
-#
-# Ignored if using {"documentation":{"url":"..."}}
-#
 content:
   image: ghcr.io/rhpds/showroom-content:latest
+  imagePullPolicy: IfNotPresent
   repoUrl: https://github.com/rhpds/showroom_template_default.git
   repoRef: main
   antoraPlaybook: default-site.yml
@@ -95,7 +77,7 @@ terminal:
 # Services to be shown as tabs on the right panel.
 #
 services:
-  - name: codeserver
-    url: https://codeserver-codeserver.apps.cluster-guid.sandbox.opentlc.com
-  # - name: myservice
-  #   url: http://myservice.com/hello2
+- name: codeserver
+  url: https://codeserver-codeserver.apps.cluster-guid.sandbox.opentlc.com
+# - name: myservice
+#   url: http://myservice.com/hello2

@@ -1,6 +1,6 @@
 kind: ConfigMap
 metadata:
-  name: showroom-proxy
+  name: {{ .Values.proxy.nginxConfigMap }}
   namespace: {{ .Values.namespace.name }}
 apiVersion: v1
 data:

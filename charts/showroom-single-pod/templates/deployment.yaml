@@ -19,7 +19,7 @@ spec:
 
       - name: nginx
         image: {{ .Values.proxy.image }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.proxy.imagePullPolicy }}
         volumeMounts:
         - mountPath: /etc/nginx/nginx.conf
           name: nginx-config
@@ -41,7 +41,7 @@ spec:
 
       - name: content
         image: {{ .Values.content.image }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.content.imagePullPolicy }}
         env:
           - name: GIT_REPO_URL
             value: {{ .Values.content.repoUrl }}
@@ -102,10 +102,10 @@ spec:
           name: {{ .Values.content.userdataName }}
       - name: content
         configMap:
-          name: {{ .Values.home.contentConfig }}
+          name: {{ .Values.proxy.indexHtmlConfigMap }}
       - configMap:
           defaultMode: 420
-          name: showroom-proxy
+          name: {{ .Values.proxy.nginxConfigMap }}
         name: nginx-config
       - emptyDir: {}
         name: nginx-pid
